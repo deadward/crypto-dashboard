@@ -1,5 +1,5 @@
 # crypto-dashboard
- dashboard to track crypto prices and change via the coinmarketcap APIs
+ Dashboard to track crypto prices and change via the coinmarketcap APIs. Uses chart.js and ag-grid. 
 
 Requirements: 
 python 3 (was written in 3.8.2 but probably any verison of 3 will work) 
