@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-theme-alpine.css">
+    <title>Stonks</title>
+    <style>
+        .rag-red {
+            background-color: lightcoral;
+        }
+        .rag-green {
+            background-color: lightgreen;
+        }
+    </style>
+</head>
+
+<body>
+<table style="width: 100%">
+    <colgroup>
+        <col span="1" style="width: 70%;">
+        <col span="1" style="width: 30%;">
+    </colgroup>
+    <tr>
+        <td rowspan="2">
+            <canvas id="doughnut-chart" width="650" height="650"></canvas>
+        </td>
+        <td align="center">
+            <br>
+            <br>
+            <span id="total" style="color:yellowgreen; font-size: 40px; font-weight: bold"/>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <span>
+                <button onClick="window.location.reload();"
+                        style="width:200px;height:100px;font-size:40px;font-weight:bold">Update Stonks!</button>
+            </span>
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript" charset="utf-8">
+var stonksList = {{stonks|tojson}};
+var myLabel = [];
+var myData = [];
+var myColor = [];
+var totalValue = 0;
+
+for (let i = 0; i < stonksList.length; i++) {
+  myColor.push('#'+Math.random().toString(16).substr(2,6));
+  //myColor.push("#" + Math.floor(Math.random()*16777215).toString(16));
+  myLabel.push(stonksList[i].symbol);
+  myData.push(stonksList[i].value);
+  totalValue = totalValue + stonksList[i].value;
+}
+
+document.getElementById("total").innerHTML = "Total Value: " + Math.round(totalValue);
+
+new Chart(document.getElementById("doughnut-chart"), {
+    type: 'doughnut',
+    data: {
+      labels: myLabel,
+      datasets: [
+        {
+            label: "Stonks",
+            data: myData,
+            backgroundColor: myColor,
+        }
+      ]
+    },
+    options: {
+      responsive: false,
+      title: {
+        display: true,
+        text: 'Distribution of Crypto Currency'
+      }
+    }
+});
+
+</script>
+
+<div id="myGrid" class="ag-theme-alpine" style="height: 600px; width:100%;"></div>
+
+<script type="text/javascript" charset="utf-8">
+    // specify the columns
+    const columnDefs = [
+      { field: "symbol", sortable: true, pinned: 'left' },
+      { field: "amount", sortable: true },
+      { field: "price", sortable: true },
+      { field: "value", sortable: true },
+      { field: "percent_change_24h", sortable: true,
+            cellClassRules: {
+            'rag-green': 'x > 0',
+            'rag-red': 'x <= 0'}},
+      { field: "total_change", sortable: true,
+            cellClassRules: {
+            'rag-green': 'x >= 0',
+            'rag-red': 'x < 0'}},
+      { field: "diversity", sortable: true }
+    ];
+
+    function numberParser(params) {
+        var newValue = params.newValue;
+        var valueAsNumber;
+        if (newValue === null || newValue === undefined || newValue === '') {
+            valueAsNumber = null;
+        } else {
+            valueAsNumber = parseFloat(params.newValue);
+        }
+        return valueAsNumber;
+    }
+
+    // specify the data
+    const rowData = {{ stonks|tojson }};
+
+    // let the grid know which columns and what data to use
+    const gridOptions = {
+      columnDefs: columnDefs,
+      rowData: rowData
+    };
+
+  // lookup the container we want the Grid to use
+  const eGridDiv = document.querySelector('#myGrid');
+
+  // create the grid passing in the div to use together with the columns & data we want to use
+  new agGrid.Grid(eGridDiv, gridOptions);
+</script>
+</body>
+</html>
